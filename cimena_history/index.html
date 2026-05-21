@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineLog — My Film Journal</title>
+
+    <!-- google fonts - three fonts working together -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap"
+        rel="stylesheet" />
+
+    <!-- icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- tailwind for layout helpers -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* ---- reset ---- */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ---- base page ----
+        warm cream with a subtle dot grid texture
+        the 3px top border is the terracotta accent
+        */
+        body {
+            background-color: #f6f3ee;
+            background-image: radial-gradient(circle, #d4cfc6 1px, transparent 1px);
+            background-size: 22px 22px;
+            color: #1a1a1a;
+            font-family: "Jost", sans-serif;
+            font-weight: 400;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            border-top: 3px solid #b85c38;
+        }
+
+        /* thin scrollbar that matches the palette */
+        ::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f6f3ee;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d4cfc6;
+        }
+
+        /* 
+        THE NAVIGATION BAR
+        */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #ffffff;
+            border-bottom: 1px solid #e2ddd5;
+            height: 64px;
+            padding: 0 2.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .brand {
+            display: flex;
+            align-items: baseline;
+        }
+
+        .brand-cine {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            color: #1a1a1a;
+        }
+
+        .brand-log {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 1.8rem;
+            font-weight: 400;
+            font-style: italic;
+            color: #b85c38;
+        }
+
+        .brand-tagline {
+            font-family: "DM Mono", monospace;
+            font-size: 0.57rem;
+            color: #b0a99e;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-left: 1.1rem;
+            border-left: 1px solid #e2ddd5;
+            padding-left: 1.1rem;
+            margin-bottom: 0.15rem;
+        }
+
+        /* the add film button in the nav */
+        .btn-add-film {
+            background: #b85c38;
+            color: #ffffff;
+            border: none;
+            padding: 0.55rem 1.4rem;
+            font-family: "Jost", sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition:
+                background 0.2s ease,
+                transform 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .btn-add-film:hover {
+            background: #9e4e2f;
+            transform: translateY(-1px);
+        }
+
+        /* 
+        THE STATS BAR
+        shows how many films in each category
+        */
+        .stats-bar {
+            background: #ffffff;
+            border-bottom: 1px solid #e2ddd5;
+            padding: 0 2.75rem;
+            height: 56px;
+            display: flex;
+            align-items: center;
+        }
+
+        .stat {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            padding-right: 2.25rem;
+            margin-right: 2.25rem;
+        }
+
+        .stat:not(:last-child) {
+            border-right: 1px solid #e2ddd5;
+        }
+
+        .stat-number {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 1.85rem;
+            font-weight: 500;
+            color: #1a1a1a;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-family: "DM Mono", monospace;
+            font-size: 0.57rem;
+            color: #b0a99e;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* 
+           THE SEARCH AND FILTER CONTROLS AREA
+        */
+        .controls-row {
+            padding: 2.25rem 2.75rem 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .search-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .search-label {
+            font-family: "DM Mono", monospace;
+            font-size: 0.57rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #b0a99e;
+        }
+
+        .search-wrap {
+            position: relative;
+        }
+
+        /* bottom border only - very minimal and refined */
+        .search-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1.5px solid #1a1a1a;
+            padding: 0.35rem 1.75rem 0.35rem 0;
+            font-family: "Jost", sans-serif;
+            font-size: 0.95rem;
+            font-weight: 300;
+            color: #1a1a1a;
+            outline: none;
+            transition: border-color 0.2s;
+            width: 100%;
+        }
+
+        .search-input::placeholder {
+            color: #c8c3ba;
+        }
+
+        .search-input:focus {
+            border-bottom-color: #b85c38;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 2px;
+            bottom: 0.45rem;
+            font-size: 0.72rem;
+            color: #b0a99e;
+            pointer-events: none;
+        }
+
+        /* the filter tab buttons - All / Want to Watch / Watching / Watched */
+        .filter-tabs {
+            display: flex;
+            align-items: flex-end;
+            border-bottom: 1.5px solid #e2ddd5;
+        }
+
+        .filter-tab {
+            position: relative;
+            bottom: -1.5px;
+            background: transparent;
+            border: none;
+            border-bottom: 1.5px solid transparent;
+            padding: 0.45rem 1.1rem;
+            font-family: "DM Mono", monospace;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #b0a99e;
+            cursor: pointer;
+            transition:
+                color 0.2s,
+                border-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .filter-tab:hover {
+            color: #1a1a1a;
+        }
+
+        /* the active tab gets a terracotta underline */
+        .filter-tab.active {
+            color: #b85c38;
+            border-bottom-color: #b85c38;
+        }
+
+        /* thin line between controls and grid */
+        .divider-line {
+            height: 1px;
+            background: #e2ddd5;
+            margin: 2rem 2.75rem 0;
+        }
+
+        /*
+           THE MOVIE GRID
+           JavaScript injects all movie cards in here
+         */
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem 2.75rem 5rem;
+        }
+
+        /* 
+           EACH INDIVIDUAL MOVIE CARD
+        */
+        .movie-card {
+            background: #ffffff;
+            border: 1px solid #e2ddd5;
+            position: relative;
+            transition:
+                transform 0.25s ease,
+                box-shadow 0.25s ease,
+                border-color 0.25s ease;
+            animation: cardIn 0.35s ease forwards;
+            opacity: 0;
+        }
+
+        /* staggered fade-in when cards load on the page */
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .movie-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .movie-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .movie-card:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .movie-card:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+
+        .movie-card:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .movie-card:nth-child(6) {
+            animation-delay: 0.3s;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.1);
+            border-color: #d4cfc6;
+        }
+
+        /* terracotta line that slides in from the left on hover */
+        .movie-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #b85c38;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+            z-index: 1;
+        }
+
+        .movie-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        /* the poster area - diagonal stripe pattern as placeholder background */
+        .card-poster {
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            background: repeating-linear-gradient(-45deg,
+                    #ede9e3 0px,
+                    #ede9e3 12px,
+                    #e4dfd7 12px,
+                    #e4dfd7 24px);
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* real poster image - shown once we fetch from the OMDB API in Week 7 */
+        .card-poster img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* the large faded first letter of the movie title in the poster corner */
+        .poster-initial {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 6rem;
+            font-weight: 300;
+            color: rgba(180, 170, 158, 0.45);
+            line-height: 1;
+            padding: 0 0.5rem 0.1rem 0;
+            user-select: none;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* the card content area below the poster */
+        .card-body {
+            padding: 0.9rem;
+        }
+
+        .card-title {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #1a1a1a;
+            line-height: 1.2;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-meta {
+            font-family: "DM Mono", monospace;
+            font-size: 0.6rem;
+            color: #b0a99e;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.85rem;
+        }
+
+        /* bottom row of the card - badge and buttons */
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* coloured status badge */
+        .status-badge {
+            font-family: "DM Mono", monospace;
+            font-size: 0.57rem;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            padding: 0.2rem 0.5rem;
+        }
+
+        .badge-want {
+            background: #f5ece7;
+            color: #b85c38;
+        }
+
+        .badge-watching {
+            background: #e8f0f8;
+            color: #3a6fa8;
+        }
+
+        .badge-watched {
+            background: #e8f2ec;
+            color: #3a7a52;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.3rem;
+        }
+
+        /* the small icon buttons on each card */
+        .card-btn {
+            background: none;
+            border: none;
+            font-size: 0.72rem;
+            color: #c8c3ba;
+            cursor: pointer;
+            padding: 0.2rem;
+            transition:
+                color 0.18s,
+                transform 0.15s;
+        }
+
+        .card-btn:hover {
+            color: #3a7a52;
+            transform: scale(1.15);
+        }
+
+        .card-btn.delete:hover {
+            color: #b83a3a;
+            transform: scale(1.15);
+        }
+
+        /* 
+           EMPTY STATE
+           shown when there are no movies to display
+        */
+        .empty-state {
+            grid-column: 1 / -1;
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .empty-glyph {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 3.5rem;
+            color: #e2ddd5;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .empty-title {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            font-style: italic;
+            color: #b0a99e;
+            margin-bottom: 0.4rem;
+        }
+
+        .empty-sub {
+            font-family: "DM Mono", monospace;
+            font-size: 0.6rem;
+            color: #c8c3ba;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* 
+           THE MODAL OVERLAY
+           the dark blurred background behind the form
+         */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 18, 16, 0.45);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        /* JS adds the 'open' class to show the modal */
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        /* 
+           THE ADD FILM FORM
+           lives inside the modal overlay
+         */
+        .form-panel {
+            background: #ffffff;
+            width: 100%;
+            max-width: 430px;
+            padding: 2.5rem;
+            position: relative;
+            animation: panelIn 0.28s ease;
+            border-top: 3px solid #b85c38;
+        }
+
+        @keyframes panelIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* the X button to close the form */
+        .form-close-btn {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+            color: #b0a99e;
+            cursor: pointer;
+            transition:
+                color 0.2s,
+                transform 0.2s;
+        }
+
+        .form-close-btn:hover {
+            color: #1a1a1a;
+            transform: rotate(90deg);
+        }
+
+        .form-heading {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 1.65rem;
+            font-weight: 500;
+            color: #1a1a1a;
+            line-height: 1;
+        }
+
+        .form-sub {
+            font-family: "DM Mono", monospace;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #b0a99e;
+            margin-top: 0.3rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-family: "DM Mono", monospace;
+            font-size: 0.57rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #b0a99e;
+            margin-bottom: 0.4rem;
+        }
+
+        /* bottom border only inputs - consistent with the search bar style */
+        .form-input,
+        .form-select {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #e2ddd5;
+            padding: 0.4rem 0;
+            font-family: "Jost", sans-serif;
+            font-size: 0.9rem;
+            font-weight: 300;
+            color: #1a1a1a;
+            outline: none;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 0;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            border-bottom-color: #b85c38;
+        }
+
+        .form-input::placeholder {
+            color: #d4cfc6;
+        }
+
+        /* the small red error message below each input */
+        .form-error {
+            font-family: "DM Mono", monospace;
+            font-size: 0.57rem;
+            color: #b83a3a;
+            letter-spacing: 0.04em;
+            margin-top: 0.35rem;
+            display: none;
+        }
+
+        /* JS adds the 'show' class to make this visible */
+        .form-error.show {
+            display: block;
+        }
+
+        /* submit button */
+        .form-submit-btn {
+            width: 100%;
+            background: #1a1a1a;
+            color: #ffffff;
+            border: none;
+            padding: 0.9rem;
+            font-family: "Jost", sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition:
+                background 0.2s,
+                transform 0.15s;
+        }
+
+        .form-submit-btn:hover {
+            background: #b85c38;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- this is the navigation bar -->
+    <nav>
+        <!-- the logo and tagline on the left -->
+        <div style="display: flex; align-items: baseline">
+            <div class="brand">
+                <span class="brand-cine">Cine</span><span class="brand-log">log</span>
+            </div>
+            <span class="brand-tagline">My Film Journal</span>
+        </div>
+
+        <!-- the add film button on the right -->
+        <button class="btn-add-film" id="open-modal-btn">
+            <i class="fa-solid fa-plus" style="font-size: 0.65rem"></i>
+            Add Film
+        </button>
+    </nav>
+
+    <!-- this is the stats bar - shows how many films are in each category -->
+    <div class="stats-bar">
+        <div class="stat">
+            <span class="stat-number" id="total-count">1</span>
+            <span class="stat-label">Films</span>
+        </div>
+
+        <div class="stat">
+            <span class="stat-number" id="watched-count">0</span>
+            <span class="stat-label">Watched</span>
+        </div>
+
+        <div class="stat">
+            <span class="stat-number" id="watching-count">0</span>
+            <span class="stat-label">Watching</span>
+        </div>
+
+        <div class="stat">
+            <span class="stat-number" id="want-count">1</span>
+            <span class="stat-label">Want to Watch</span>
+        </div>
+    </div>
+
+    <!-- this is the search bar and the filter buttons -->
+    <div class="controls-row">
+        <!-- search box on the left -->
+        <div class="search-box">
+            <span class="search-label">Search Collection</span>
+            <div class="search-wrap">
+                <input type="text" class="search-input" id="search-input" placeholder="Start typing a title..." />
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            </div>
+        </div>
+
+        <!-- filter tabs on the right - click to filter by status -->
+        <div class="filter-tabs">
+            <button class="filter-tab active" id="filter-all">All</button>
+            <button class="filter-tab" id="filter-want">Want to Watch</button>
+            <button class="filter-tab" id="filter-watching">Watching</button>
+            <button class="filter-tab" id="filter-watched">Watched</button>
+        </div>
+    </div>
+
+    <!-- decorative divider line -->
+    <div class="divider-line"></div>
+
+    <!-- this is the movie grid - JavaScript puts all the cards in here -->
+    <div class="movie-grid" id="movie-grid">
+        <!--
+            this one card is hardcoded so the page looks good on day one.
+            from week 5 onwards, JavaScript will take over and render
+            all cards dynamically - this one will be removed.
+        -->
+        <div class="movie-card">
+            <div class="card-poster">
+                <!-- this big letter shows the first letter of the movie title -->
+                <span class="poster-initial">S</span>
+            </div>
+            <div class="card-body">
+                <div class="card-title">Spirited Away</div>
+                <div class="card-meta">2001 &nbsp;&middot;&nbsp; Animation</div>
+                <div class="card-footer">
+                    <span class="status-badge badge-want">Want to Watch</span>
+                    <div class="card-actions">
+                        <!-- this button marks the film as watched -->
+                        <button class="card-btn" title="Mark as watched">
+                            <i class="fa-regular fa-circle-check"></i>
+                        </button>
+                        <!-- this button removes the film from the list -->
+                        <button class="card-btn delete" title="Remove">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- this is the popup that appears when you click Add Film -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="form-panel">
+            <!-- clicking this closes the popup -->
+            <button class="form-close-btn" id="close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="form-heading">Add a Film</div>
+            <div class="form-sub">To your collection</div>
+
+            <!-- the add movie form - JavaScript handles everything here -->
+            <form id="add-movie-form" novalidate>
+                <!-- title field -->
+                <div class="form-group">
+                    <label class="form-label" for="input-title">Title</label>
+                    <input type="text" class="form-input" id="input-title" placeholder="e.g. Parasite" />
+                    <!-- this error shows if the title is left empty -->
+                    <div class="form-error" id="error-title">Please enter a title</div>
+                </div>
+
+                <!-- year field -->
+                <div class="form-group">
+                    <label class="form-label" for="input-year">Year</label>
+                    <input type="number" class="form-input" id="input-year" placeholder="e.g. 2019" min="1888"
+                        max="2099" />
+                    <!-- this error shows if the year is invalid -->
+                    <div class="form-error" id="error-year">
+                        Please enter a valid year
+                    </div>
+                </div>
+
+                <!-- genre dropdown -->
+                <div class="form-group">
+                    <label class="form-label" for="input-genre">Genre</label>
+                    <select class="form-select" id="input-genre">
+                        <option value="">Select a genre</option>
+                        <option value="Action">Action</option>
+                        <option value="Animation">Animation</option>
+                        <option value="Comedy">Comedy</option>
+                        <option value="Drama">Drama</option>
+                        <option value="Horror">Horror</option>
+                        <option value="Romance">Romance</option>
+                        <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Thriller">Thriller</option>
+                        <option value="Documentary">Documentary</option>
+                    </select>
+                    <!-- this error shows if no genre is selected -->
+                    <div class="form-error" id="error-genre">Please select a genre</div>
+                </div>
+
+                <!-- status dropdown -->
+                <div class="form-group">
+                    <label class="form-label" for="input-status">Status</label>
+                    <select class="form-select" id="input-status">
+                        <option value="">Select status</option>
+                        <option value="want">Want to Watch</option>
+                        <option value="watching">Watching</option>
+                        <option value="watched">Watched</option>
+                    </select>
+                    <!-- this error shows if no status is selected -->
+                    <div class="form-error" id="error-status">
+                        Please select a status
+                    </div>
+                </div>
+
+                <button type="submit" class="form-submit-btn">
+                    Add to Collection
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- this is where all the JavaScript lives -->
+    <script src="app.js"></script>
+</body>
+
+</html>
